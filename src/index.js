@@ -6,6 +6,17 @@ const db = require('./db');
 const models = require('./models');
 const typeDefs = require('./schema');
 const resolvers = require('./resolvers');
+const jwt = require('jsonwebtoken');
+
+const getUser = token => {
+  if (token) {
+    try {
+      return jwt.verify(token, process.env.JWT_SECRET);
+    } catch (err) {
+      throw new Error('Session invalid');
+    }
+  }
+};
 
 // .env 파일에 명시된 포트 또는 포트 4000에서 서버를 실행
 const port = process.env.PORT || 4000;
@@ -19,8 +30,12 @@ db.connect(DB_HOST);
 const server = new ApolloServer({
   typeDefs,
   resolvers,
-  context: () => {
-    return { models };
+  context: ({ req }) => {
+    const token = req.headers.authorization;
+    const user = getUser(token);
+    console.log(user);
+
+    return { models, user };
   },
 });
 
