@@ -2,8 +2,11 @@
 // This is the main entry point of our application
 const express = require('express');
 const {ApolloServer, gql} = require('apollo-server-express');
+require('dotenv').config();
+const db = require('./db');
 
 const port = process.env.PORT || 4000;
+const DB_HOST = process.env.DB_HOST;
 
 const typeDefs = gql`
     type Query {
@@ -50,6 +53,8 @@ let notes = [
 ]
 
 const app = express();
+
+db.connect(DB_HOST);
 
 const server = new ApolloServer({typeDefs, resolvers});
 
